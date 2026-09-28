@@ -34,7 +34,7 @@ export function AgentChat() {
     return localStorage.getItem("active-workflow-run-id") ?? undefined;
   }, []);
 
-  const { messages, error, sendMessage } = useChat<ShoppingAgentUIMessage>({
+  const { messages, status, error, sendMessage } = useChat<ShoppingAgentUIMessage>({
     resume: Boolean(activeRunId),
     transport: new WorkflowChatTransport({
       api: "/api/chat",
@@ -58,6 +58,13 @@ export function AgentChat() {
     sendMessage({ text: input });
     setInput("");
   };
+
+  const lastMessage = messages[messages.length - 1];
+  const lastMessageHasContent =
+    lastMessage?.role === "assistant" && lastMessage.parts.length > 0;
+  const isThinking =
+    status === "submitted" ||
+    (status === "streaming" && !lastMessageHasContent);
 
   if (error) return <div>{error.message}</div>;
 
@@ -88,6 +95,13 @@ export function AgentChat() {
                   return null;
               }
             }),
+          )}
+          {isThinking && (
+            <Message from="assistant">
+              <MessageContent>
+                <MessageResponse>Thinking…</MessageResponse>
+              </MessageContent>
+            </Message>
           )}
         </ConversationContent>
         <ConversationScrollButton />
