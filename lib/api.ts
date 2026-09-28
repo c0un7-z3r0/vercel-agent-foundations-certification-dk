@@ -6,12 +6,15 @@ import type {
   BackOfficeSalesMeta,
   BackOfficeStockMeta,
   CartWithProducts,
-  CategorySlug,
   Category,
+  CategorySlug,
+  Order,
   PaginationMeta,
   Product,
   ProductSalesRow,
   Promotion,
+  RefundPreauthorization,
+  Return,
   StockEntry,
   StockInfo,
   StoreConfig,
@@ -19,9 +22,6 @@ import type {
   SupportTicketCategory,
   SupportTicketPriority,
   SupportTicketStatus,
-  Order,
-  RefundPreauthorization,
-  Return,
 } from "./types";
 
 const API_BASE_URL =
@@ -369,9 +369,15 @@ export async function cartRemove(
 }
 
 export async function getOrder(id: string): Promise<Order> {
-  return request<Order>(`/orders/${encodeURIComponent(id)}`, {
-    cache: "no-store",
-  });
+  const orderResult = await request<Order>(
+    `/orders/${encodeURIComponent(id)}`,
+    {
+      cache: "no-store",
+    },
+  );
+  console.log(orderResult);
+
+  return orderResult;
 }
 
 export async function createReturn(input: CreateReturnInput): Promise<Return> {

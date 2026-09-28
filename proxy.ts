@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 import { ADMIN_COOKIE_NAME, ADMIN_PASSWORD } from "@/lib/admin-auth";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
