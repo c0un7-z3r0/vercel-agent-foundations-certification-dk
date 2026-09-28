@@ -16,8 +16,8 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
-import { useState } from "react";
+import { WorkflowChatTransport } from "@workflow/ai";
+import { useMemo, useState } from "react";
 import {
   Message,
   MessageContent,
@@ -33,9 +33,29 @@ const SUGGESTIONS = [
 export function AdminAgentChat() {
   const [input, setInput] = useState("");
 
+  const activeRunId = useMemo(() => {
+    if (typeof window === "undefined") return undefined;
+    return localStorage.getItem("active-admin-workflow-run-id") ?? undefined;
+  }, []);
+
   const { messages, error, sendMessage } = useChat({
-    // we need to point to a different API route because this is a different agent
-    transport: new DefaultChatTransport({ api: "/api/admin/chat" }),
+    resume: Boolean(activeRunId),
+    transport: new WorkflowChatTransport({
+      api: "/api/admin/chat",
+      onChatSendMessage: (response) => {
+        const runId = response.headers.get("x-workflow-run-id");
+        if (runId) localStorage.setItem("active-admin-workflow-run-id", runId);
+      },
+      onChatEnd: () => localStorage.removeItem("active-admin-workflow-run-id"),
+      prepareReconnectToStreamRequest: ({ api, ...rest }) => {
+        const runId = localStorage.getItem("active-admin-workflow-run-id");
+        if (!runId) throw new Error("No active admin workflow run ID found");
+        return {
+          ...rest,
+          api: `/api/admin/chat/${encodeURIComponent(runId)}/stream`,
+        };
+      },
+    }),
   });
 
   const handleSubmit = (message: PromptInputMessage) => {

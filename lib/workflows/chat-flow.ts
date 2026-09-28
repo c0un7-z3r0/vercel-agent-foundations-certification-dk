@@ -4,18 +4,15 @@ import {
   returnOrder,
   searchProducts,
 } from "@/lib/tools";
+import { convertMessagesStep } from "./convert-messages-step";
 import { DurableAgent } from "@workflow/ai/agent";
-import {
-  convertToModelMessages,
-  type UIMessage,
-  type UIMessageChunk,
-} from "ai";
+import { type UIMessage, type UIMessageChunk } from "ai";
 import { getWritable } from "workflow";
 
 export async function chatFlow(messages: UIMessage[]) {
   "use workflow";
 
-  const modelMessages = await convertToModelMessages(messages);
+  const modelMessages = await convertMessagesStep(messages);
 
   const agent = new DurableAgent({
     model: "anthropic/claude-sonnet-4.6",

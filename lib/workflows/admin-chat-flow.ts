@@ -8,15 +8,13 @@ import {
   getSupportTickets,
   searchProducts,
 } from "@/lib/tools";
+import { convertMessagesStep } from "./convert-messages-step";
 import { DurableAgent } from "@workflow/ai/agent";
-import {
-  convertToModelMessages,
-  type UIMessage,
-  type UIMessageChunk,
-} from "ai";
+import { type UIMessage, type UIMessageChunk } from "ai";
 import { getWritable } from "workflow";
 
 export async function readMemories() {
+  "use step";
   const sandbox = await createOrGetSandbox(SANDBOX_NAME);
   const buffer = await sandbox.readFileToBuffer({ path: "memories.md" });
   return buffer ? new TextDecoder().decode(buffer) : null;
@@ -42,7 +40,7 @@ export const backOfficeInstructions = `You are the back-office assistant for the
 export async function adminChatFlow(messages: UIMessage[]) {
   "use workflow";
 
-  const modelMessages = await convertToModelMessages(messages);
+  const modelMessages = await convertMessagesStep(messages);
 
   const memories = await readMemories();
 

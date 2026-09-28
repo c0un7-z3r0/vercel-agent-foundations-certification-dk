@@ -24,3 +24,4 @@ export type SearchProductsToolInvocation = UIToolInvocation<
 export type ProductDetailsToolInvocation = UIToolInvocation<
   typeof getProductDetails
 >;
+export type ReturnOrderToolInvocation = UIToolInvocation<typeof returnOrder>;

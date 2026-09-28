@@ -19,7 +19,7 @@ import {
   PromptInputTextarea,
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
-import type { ShoppingAgentUIMessage } from "@/lib/agent";
+import type { ReturnOrderToolInvocation, ShoppingAgentUIMessage } from "@/lib/agent";
 import { useChat } from "@ai-sdk/react";
 import { WorkflowChatTransport } from "@workflow/ai";
 import { useMemo, useState } from "react";
@@ -91,6 +91,44 @@ export function AgentChat() {
                   return (
                     <AgentProductCard key={`${m.id}-${i}`} invocation={p} />
                   );
+                case "tool-returnOrder": {
+                  const inv = p as ReturnOrderToolInvocation;
+                  if (
+                    inv.state === "input-streaming" ||
+                    inv.state === "input-available"
+                  ) {
+                    return (
+                      <div
+                        key={`${m.id}-${i}`}
+                        className="my-2 rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-500"
+                      >
+                        Filing return…
+                      </div>
+                    );
+                  }
+                  if (inv.state === "output-available") {
+                    if (inv.output && typeof inv.output === "object" && "error" in inv.output) {
+                      return (
+                        <div
+                          key={`${m.id}-${i}`}
+                          className="my-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                        >
+                          {String((inv.output as { error: unknown }).error)}
+                        </div>
+                      );
+                    }
+                    const output = inv.output as { runId?: string; message?: string } | undefined;
+                    return (
+                      <div
+                        key={`${m.id}-${i}`}
+                        className="my-2 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
+                      >
+                        {output?.message ?? "Return request received."}
+                      </div>
+                    );
+                  }
+                  return null;
+                }
                 default:
                   return null;
               }
